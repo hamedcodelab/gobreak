@@ -31,3 +31,7 @@ type breaker struct {
 	halfOpenMaxRequests  int           // Requests allowed in half-open state
 	timeout              time.Duration // Timeout for requests
 }
+
+func NewBreaker() Breaker {
+	return &breaker{}
+}
