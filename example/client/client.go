@@ -4,37 +4,40 @@ import (
 	"context"
 	"fmt"
 	"github.com/hamedcodelab/gobreak"
-	helloworld "github.com/hamedcodelab/gobreak/example/proto"
-	"google.golang.org/grpc"
 	"log"
+	"net/http"
 	"time"
 )
 
 func main() {
-	// only create gobreak
+
 	gbrk := gobreak.NewBreaker(gobreak.WithFailureThreshold(1), gobreak.WithRecoveryTime(time.Minute*4), gobreak.WithHalfOpenMaxRequests(2))
 
-	var conn *grpc.ClientConn
-	// first grpc call with error
+	var client http.Client
+	url := "http://localhost:8080"
+
 	gbrk.Execute(func() error {
-		// Connect to the server
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-		var err error
-		conn, err = grpc.DialContext(ctx, ":50051", grpc.WithInsecure(), grpc.WithBlock())
+		req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+		if err != nil {
+			return err
+		}
+		_, err = client.Do(req)
 		if err != nil {
 			return err
 		}
 		return nil
 	})
 
-	// first grpc call again error
 	gbrk.Execute(func() error {
-		// Connect to the server
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-		var err error
-		conn, err = grpc.DialContext(ctx, ":50051", grpc.WithInsecure(), grpc.WithBlock())
+		req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+		if err != nil {
+			return err
+		}
+		_, err = client.Do(req)
 		if err != nil {
 			return err
 		}
@@ -43,34 +46,41 @@ func main() {
 
 	time.Sleep(time.Second * 5)
 
-	// first grpc call again error
 	gbrk.Execute(func() error {
-		// Connect to the server
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
-		var err error
-		conn, err = grpc.DialContext(ctx, ":50051", grpc.WithInsecure(), grpc.WithBlock())
+		req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+		if err != nil {
+			return err
+		}
+		_, err = client.Do(req)
 		if err != nil {
 			return err
 		}
 		return nil
 	})
 
-	defer conn.Close()
+	time.Sleep(time.Second * 5)
 
-	// Create a Greeter client
-	c := helloworld.NewGreeterClient(conn)
+	err := gbrk.Execute(func() error {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+		if err != nil {
+			return err
+		}
+		resp, err := client.Do(req)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
+		fmt.Println("Response Status:", resp.Status)
+		return nil
+	})
 
-	// Make a request
-	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
-	defer cancel()
-
-	// Call the SayHello RPC
-	r, err := c.SayHello(ctx, &helloworld.HelloRequest{Name: "World"})
 	if err != nil {
-		log.Fatalf("could not greet: %v", err)
+		log.Fatalf("HTTP request failed: %v", err)
 	}
 
-	// Print the response
-	fmt.Printf("Greeting: %s\n", r.GetMessage())
+	fmt.Println("HTTP request successful")
 }
