@@ -12,13 +12,50 @@ import (
 
 func main() {
 	// only create gobreak
-	gbrk := gobreak.NewBreaker()
-	log.Println(gbrk)
-	// Connect to the server
-	conn, err := grpc.Dial(":50051", grpc.WithInsecure(), grpc.WithBlock())
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
-	}
+	gbrk := gobreak.NewBreaker(gobreak.WithFailureThreshold(1), gobreak.WithRecoveryTime(time.Minute*4), gobreak.WithHalfOpenMaxRequests(2))
+
+	var conn *grpc.ClientConn
+	// first grpc call with error
+	gbrk.Execute(func() error {
+		// Connect to the server
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		var err error
+		conn, err = grpc.DialContext(ctx, ":50051", grpc.WithInsecure(), grpc.WithBlock())
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+
+	// first grpc call again error
+	gbrk.Execute(func() error {
+		// Connect to the server
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		var err error
+		conn, err = grpc.DialContext(ctx, ":50051", grpc.WithInsecure(), grpc.WithBlock())
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+
+	time.Sleep(time.Second * 5)
+
+	// first grpc call again error
+	gbrk.Execute(func() error {
+		// Connect to the server
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		var err error
+		conn, err = grpc.DialContext(ctx, ":50051", grpc.WithInsecure(), grpc.WithBlock())
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+
 	defer conn.Close()
 
 	// Create a Greeter client

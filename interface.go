@@ -6,7 +6,7 @@ import (
 )
 
 type Breaker interface {
-	Execute(func() error) error
+	Execute(func() error)
 }
 
 // NAME: breaker
@@ -36,6 +36,7 @@ func NewBreaker(opts ...Option) Breaker {
 		halfOpenMaxRequests:    1,
 		failureThresholdAllow:  3,
 		state:                  Closed,
+		timeToHalfOpen:         time.Now(),
 	}
 
 	for _, opt := range opts {

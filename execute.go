@@ -2,14 +2,12 @@ package gobreak
 
 import "time"
 
-func (b *breaker) Execute(fn func() error) error {
+func (b *breaker) Execute(fn func() error) {
 	err := fn()
 	if err != nil {
 		b.handleError()
-		return err
 	}
 	b.handleSuccess()
-	return nil
 }
 
 func (b *breaker) handleError() {
