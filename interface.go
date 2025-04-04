@@ -6,7 +6,7 @@ import (
 )
 
 type Breaker interface {
-	Execute(func() error)
+	Execute(func() error) error
 }
 
 // NAME: breaker
