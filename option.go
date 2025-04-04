@@ -7,14 +7,14 @@ type Option func(*breaker)
 // Option to set failure threshold
 func WithFailureThreshold(threshold int) Option {
 	return func(b *breaker) {
-		b.failureThreshold = threshold
+		b.failureThresholdAllow = threshold
 	}
 }
 
 // Option to set recovery time
 func WithRecoveryTime(duration time.Duration) Option {
 	return func(b *breaker) {
-		b.recoveryTime = duration
+		b.recoveryTimeToHalfOpen = duration
 	}
 }
 
@@ -25,12 +25,15 @@ func WithHalfOpenMaxRequests(max int) Option {
 	}
 }
 
+/*
 // Option to set timeout
 func WithTimeout(duration time.Duration) Option {
 	return func(b *breaker) {
 		b.timeout = duration
 	}
 }
+
+*/
 
 // Option to set initial state
 func WithInitialState(state State) Option {
@@ -39,12 +42,15 @@ func WithInitialState(state State) Option {
 	}
 }
 
+/*
 // Option to set last failure time (useful for testing or resetting)
 func WithLastFailureTime(t time.Time) Option {
 	return func(b *breaker) {
 		b.lastFailureTime = t
 	}
 }
+
+*/
 
 // Option to set initial failure count (useful for restoring state)
 func WithFailureCount(count int) Option {
@@ -53,9 +59,12 @@ func WithFailureCount(count int) Option {
 	}
 }
 
+/*
 // Option to set half-open success count
 func WithHalfOpenSuccessCount(count int) Option {
 	return func(b *breaker) {
 		b.halfOpenSuccessCount = count
 	}
 }
+
+*/
