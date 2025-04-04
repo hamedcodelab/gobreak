@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/hamedcodelab/gobreak"
 	helloworld "github.com/hamedcodelab/gobreak/example/proto"
 	"google.golang.org/grpc"
 	"log"
@@ -10,6 +11,9 @@ import (
 )
 
 func main() {
+	// only create gobreak
+	gbrk := gobreak.NewBreaker()
+	log.Println(gbrk)
 	// Connect to the server
 	conn, err := grpc.Dial(":50051", grpc.WithInsecure(), grpc.WithBlock())
 	if err != nil {
