@@ -20,7 +20,7 @@ func main() {
 	// Create an HTTP client
 	var client http.Client
 	// todo Change to your actual endpoint
-	url := "http://localhost:8080"
+	url := "http://localhost:8000"
 
 	// Simulate a failure to trip the breaker
 	fmt.Println("Executing request 1 (failure expected)...")
@@ -70,6 +70,7 @@ func main() {
 	}
 
 	// Once the breaker has transitioned to closed, try again
+	url = "https://httpbin.org/get"
 	fmt.Println("\nWaiting for breaker to move to 'closed' state after success...")
 	time.Sleep(2 * time.Second)
 
