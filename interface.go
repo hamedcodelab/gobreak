@@ -19,7 +19,7 @@ type Breaker interface {
 // halfOpenMaxRequests: The maximum number of successful requests needed to close the circuit.
 
 type breaker struct {
-	mu                     sync.Mutex
+	mutex                  *sync.Mutex
 	state                  State
 	failureCount           int
 	SuccessRequestCount    int
@@ -31,6 +31,7 @@ type breaker struct {
 
 func NewBreaker(opts ...Option) Breaker {
 	b := &breaker{
+		mutex:                  &sync.Mutex{},
 		failureCount:           0,
 		recoveryTimeToHalfOpen: 10 * time.Second,
 		halfOpenMaxRequests:    1,

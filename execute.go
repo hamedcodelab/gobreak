@@ -3,6 +3,8 @@ package gobreak
 import "time"
 
 func (b *breaker) Execute(fn func() error) error {
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
 	err := fn()
 	if err != nil {
 		b.failureCount++
@@ -20,6 +22,8 @@ func (b *breaker) Execute(fn func() error) error {
 }
 
 func (b *breaker) handleError() {
+	b.mutex.Lock()
+	defer b.mutex.Unlock()
 	if b.state == Closed && b.failureCount >= b.failureThresholdAllow {
 		b.state = HalfOpen
 		b.failureCount = 0
